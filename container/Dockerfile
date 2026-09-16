@@ -36,9 +36,9 @@ RUN apt-get update && \
     apt-get install -y build-essential curl libglib2.0-dev meson ninja-build \
         python3-pip python3-venv python3-sphinx-rtd-theme && \
     apt-get clean
-RUN curl -O https://download.qemu.org/qemu-9.0.0.tar.xz && \
-    tar -xf qemu-9.0.0.tar.xz
-WORKDIR /qemu-9.0.0
+RUN curl -O https://download.qemu.org/qemu-10.2.4.tar.xz && \
+    tar -xf qemu-10.2.4.tar.xz
+WORKDIR /qemu-10.2.4
 RUN ./configure --target-list=riscv64-linux-user && make -j
 
 FROM docker.io/ubuntu:26.04
@@ -49,7 +49,7 @@ RUN apt-get update && \
     apt-get clean
 
 # Add the various tools.
-COPY --from=qemu /qemu-9.0.0/build/qemu-riscv64 /usr/local/bin/
+COPY --from=qemu /qemu-10.2.4/build/qemu-riscv64 /usr/local/bin/
 COPY --from=toolchain /opt/riscv /opt/riscv
 COPY --from=spike /opt/riscv /opt/riscv
 
