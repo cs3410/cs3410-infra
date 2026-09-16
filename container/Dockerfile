@@ -1,4 +1,4 @@
-FROM docker.io/ubuntu:22.04 AS toolchain
+FROM docker.io/ubuntu:26.04 AS toolchain
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install -y autoconf automake autotools-dev curl python3 \
@@ -8,26 +8,29 @@ RUN apt-get update && \
         libslirp-dev && \
     apt-get clean
 COPY gitconfig /root/.gitconfig
-RUN git clone --depth 1 https://github.com/riscv/riscv-gnu-toolchain
+RUN git clone --depth 1 --revision b488ddbd6cdc7d2b951f4bccacc324818356bfc3 \
+    https://github.com/riscv/riscv-gnu-toolchain
 WORKDIR /riscv-gnu-toolchain
+COPY gcc14.patch .
+RUN git apply --index gcc14.patch
 RUN ./configure --prefix=/opt/riscv --with-arch=rv64g --with-abi=lp64d \
         --enable-libsanitizer && \
    make -j2 linux
 
-FROM docker.io/ubuntu:22.04 AS spike
+FROM docker.io/ubuntu:26.04 AS spike
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install -y build-essential git device-tree-compiler \
         libboost-regex-dev libboost-system-dev libboost-thread-dev && \
     apt-get clean
-RUN git clone \
+RUN git clone --depth 1 --revision 82742081e9b1a6bc01eebc932fed956317bc95cd \
     https://github.com/riscv-software-src/riscv-isa-sim.git
 WORKDIR /riscv-isa-sim/build
 RUN ../configure --prefix=/opt/riscv --with-arch=rv64g && \
     make && \
     make install
 
-FROM docker.io/ubuntu:22.04 AS qemu
+FROM docker.io/ubuntu:26.04 AS qemu
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install -y build-essential curl libglib2.0-dev meson ninja-build \
@@ -38,7 +41,7 @@ RUN curl -O https://download.qemu.org/qemu-9.0.0.tar.xz && \
 WORKDIR /qemu-9.0.0
 RUN ./configure --target-list=riscv64-linux-user && make -j
 
-FROM docker.io/ubuntu:22.04
+FROM docker.io/ubuntu:26.04
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC \
     apt-get install -y python3-dev libmpc-dev libglib2.0 git make \
