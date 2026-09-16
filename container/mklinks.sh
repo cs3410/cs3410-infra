@@ -19,8 +19,8 @@ echo -e '#!/bin/bash\nas "$1" -o tmp.o && objcopy tmp.o -O binary "${1%.*}.bin" 
 chmod +x /usr/local/bin/asbin
 
 # Easier debug utility
-echo -e '#!/bin/bash\nqemu -g 1234 "$@" & gdb -q -ex "set tcp auto-retry on" -ex "set tcp connect-timeout 5" -ex "target remote localhost:1234" -ex "set sysroot /opt/riscv/sysroot" -ex "set can-use-hw-watchpoints 0" "$1"\n' > /usr/local/bin/qdebug
-chmod +x /usr/local/bin/qdebug
+echo -e '#!/bin/bash\nqemu -g 1234 "$@" & gdb -q -ex "set tcp auto-retry on" -ex "set tcp connect-timeout 5" -ex "target remote localhost:1234" -ex "set sysroot /opt/riscv/sysroot" -ex "set can-use-hw-watchpoints 0" "$1"\n' > /usr/local/bin/qdb
+chmod +x /usr/local/bin/qdb
 
 # Make it as though rv / rv-debug wasn't part of the command in case someone pastes it in:
 echo -e '#!/bin/bash\nexec "$@"\n' > /usr/local/bin/rv
