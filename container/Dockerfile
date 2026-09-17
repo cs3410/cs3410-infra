@@ -8,8 +8,11 @@ RUN apt-get update && \
         libslirp-dev && \
     apt-get clean
 COPY gitconfig /root/.gitconfig
-RUN git clone --depth 1 https://github.com/riscv/riscv-gnu-toolchain
+RUN git clone https://github.com/riscv/riscv-gnu-toolchain
 WORKDIR /riscv-gnu-toolchain
+RUN git checkout a504f73f40d556aaa9a55b3d4377abba0176c2b5
+COPY gcc14.patch .
+RUN git apply --index gcc14.patch
 RUN ./configure --prefix=/opt/riscv --with-arch=rv64g --with-abi=lp64d \
         --enable-libsanitizer && \
    make -j2 linux
